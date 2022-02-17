@@ -24,15 +24,16 @@ int main (void) {
     GPIOA->ODR ^= GPIO_ODR_6;
     while (1) 
     {
-
+        //Blink
         GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
+
         for (volatile uint64_t i = 0; i < 100000; i++);
         //UART Receive
-        if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
+        if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE) //TODO Interrupt Based Receive 
         {
             charToReceive = (uint8_t)(USART1->RDR);
         }
         //UART transmit
-        USART1->TDR = charToReceive;
+        USART1->TDR = charToReceive; //TODO Transfer to CAN :P
     }
 }
