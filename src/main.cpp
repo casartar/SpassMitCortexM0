@@ -20,13 +20,11 @@ int main (void) {
     USART1->BRR = SystemCoreClock/9600;
     USART1->CR1 |= USART_CR1_TE | USART_CR1_UE | USART_CR1_RE | USART_CR1_RXNEIE;
     NVIC_EnableIRQ(USART1_IRQn);
-    char charToReceive = 0x55;
 
     GPIOA->ODR ^= GPIO_ODR_6;
     while (1) 
     {
-        //Blink
-        GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
+
 
         for (volatile uint64_t i = 0; i < 100000; i++);
 
@@ -34,6 +32,8 @@ int main (void) {
 }
 
 void USART1_IRQHandler(void) { // Interrupt for lower to upper case
+    //Blink
+    GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
     if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
     {
         USART1->TDR = (uint8_t)(USART1->RDR+32);
