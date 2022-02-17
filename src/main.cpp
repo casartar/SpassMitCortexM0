@@ -18,7 +18,8 @@ int main (void) {
     GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL10_Pos; //Pin 10 AF1
     //UART Config
     USART1->BRR = SystemCoreClock/9600;
-    USART1->CR1 |= USART_CR1_TE | USART_CR1_UE | USART_CR1_RE;
+    USART1->CR1 |= USART_CR1_TE | USART_CR1_UE | USART_CR1_RE | USART_CR1_RXNEIE;
+    NVIC_EnableIRQ(USART1_IRQn);
     char charToReceive = 0x55;
 
     GPIOA->ODR ^= GPIO_ODR_6;
@@ -28,12 +29,13 @@ int main (void) {
         GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
 
         for (volatile uint64_t i = 0; i < 100000; i++);
-        //UART Receive
-        if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE) //TODO Interrupt Based Receive 
-        {
-            charToReceive = (uint8_t)(USART1->RDR);
-        }
-        //UART transmit
-        USART1->TDR = charToReceive; //TODO Transfer to CAN :P
+
+    }
+}
+
+void USART1_IRQHandler(void) { // Interrupt for lower to upper case
+    if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
+    {
+        USART1->TDR = (uint8_t)(USART1->RDR+32);
     }
 }
