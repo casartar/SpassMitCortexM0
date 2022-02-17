@@ -24,18 +24,17 @@ int main (void) {
     GPIOA->ODR ^= GPIO_ODR_6;
     while (1) 
     {
-
-
         for (volatile uint64_t i = 0; i < 100000; i++);
-
     }
 }
 
-void USART1_IRQHandler(void) { // Interrupt for lower to upper case
-    //Blink
-    GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
-    if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
-    {
-        USART1->TDR = (uint8_t)(USART1->RDR+32);
+extern "C" {
+    void USART1_IRQHandler(void) { // Interrupt for lower to upper case
+        //Blink
+        GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
+        if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
+        {
+            USART1->TDR = (uint8_t)(USART1->RDR+32);
+        }
     }
 }
