@@ -1,5 +1,10 @@
 #include "stm32f091xc.h"
 
+const uint32_t blink_fast = 100000;
+const uint32_t blink_slow = 600000;
+uint32_t       blink_curr = blink_fast;
+
+
 int main (void) {
    
 
@@ -54,7 +59,20 @@ int main (void) {
 
     while (1) 
     {
-        for (volatile uint64_t i = 0; i < 100000; i++);
+        //blink led
+        GPIOA->ODR ^= GPIO_ODR_5;
+
+        if (GPIOA->IDR & GPIO_IDR_6)
+        {
+            blink_curr = blink_fast;
+        }
+        else
+        {
+            blink_curr = blink_slow;
+        };
+
+        // delay current blink period
+        for (volatile uint64_t i = 0; i < blink_curr; i++);
     }
 }
 
