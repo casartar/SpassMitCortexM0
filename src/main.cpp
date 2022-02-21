@@ -90,8 +90,8 @@ extern "C" {
         // change blink rate, once per receive event.
         GPIOA->ODR ^= GPIO_ODR_6;
 
-        // get received chars
-        while (USART1->ISR & USART_ISR_RXNE)
+        // get received char
+        if (USART1->ISR & USART_ISR_RXNE)
         {
             USART1->TDR = (uint8_t)(USART1->RDR+32);
         }
