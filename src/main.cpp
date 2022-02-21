@@ -4,6 +4,14 @@ const uint32_t blink_fast = 100000;
 const uint32_t blink_slow = 600000;
 uint32_t       blink_curr = blink_fast;
 
+/*
+Pins:
+ PA5: LED (out, no AF)
+ PA6: flag slow/fast (out, no AF)
+ PA8: TIM1_CH1 out (AF2)
+ PA9: USART1_TX (AF1)
+PA10: USART1_RX (AF1)
+*/
 
 int main (void) {
    
@@ -78,9 +86,12 @@ int main (void) {
 
 extern "C" {
     void USART1_IRQHandler(void) { // Interrupt for lower to upper case
-        //Blink
-        GPIOA->ODR ^= GPIO_ODR_5 | GPIO_ODR_6;
-        if ((USART1->ISR & USART_ISR_RXNE) == USART_ISR_RXNE)
+
+        // change blink rate, once per receive event.
+        GPIOA->ODR ^= GPIO_ODR_6;
+
+        // get received chars
+        while (USART1->ISR & USART_ISR_RXNE)
         {
             USART1->TDR = (uint8_t)(USART1->RDR+32);
         }
