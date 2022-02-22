@@ -1,8 +1,8 @@
 #include "stm32f091xc.h"
 
 const uint32_t blink_fast = 100000;
-const uint32_t blink_slow = 600000;
-uint32_t       blink_curr = blink_fast;
+const uint32_t blink_slow = 400000;
+volatile uint32_t blink_curr = blink_fast;
 
 /*
 Pins:
@@ -12,6 +12,7 @@ Pins:
  PA9: USART1_TX (AF1)
 PA10: USART1_RX (AF1)
 */
+
 
 int main (void) {
    
@@ -70,15 +71,6 @@ int main (void) {
         //blink led
         GPIOA->ODR ^= GPIO_ODR_5;
 
-        if (GPIOA->IDR & GPIO_IDR_6)
-        {
-            blink_curr = blink_fast;
-        }
-        else
-        {
-            blink_curr = blink_slow;
-        };
-
         // delay current blink period
         for (volatile uint64_t i = 0; i < blink_curr; i++);
     }
@@ -87,13 +79,24 @@ int main (void) {
 extern "C" {
     void USART1_IRQHandler(void) { // Interrupt for lower to upper case
 
-        // change blink rate, once per receive event.
-        GPIOA->ODR ^= GPIO_ODR_6;
-
-        // get received char
+        // did we receive a char?
         if (USART1->ISR & USART_ISR_RXNE)
         {
-            USART1->TDR = (uint8_t)(USART1->RDR+32);
+            uint8_t rxchar = (uint8_t)(USART1->RDR); //read char, clear interrupt flag
+
+            if ((rxchar == 's')  || (rxchar == 'S'))
+            {
+                blink_curr = blink_slow;
+            }
+            else
+            {
+                if ((rxchar == 'f')  || (rxchar == 'F'))
+                {
+                    blink_curr = blink_fast;
+                }
+            };
+            
+            USART1->TDR = rxchar+32;            
         }
     }
 }
