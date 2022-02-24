@@ -1,4 +1,5 @@
 #include "stm32f091xc.h"
+#include "uart.h"
 
 const uint32_t blink_fast = 100000;
 const uint32_t blink_slow = 400000;
@@ -15,6 +16,7 @@ PA10: USART1_RX (AF1)
 
 int main(void)
 {
+    uart_init();
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN; //RCC ON
 
     GPIOA->MODER |= GPIO_MODER_MODER5_0 | GPIO_MODER_MODER6_0; //mode out GPIO 5 and 6
@@ -22,19 +24,7 @@ int main(void)
     GPIOA->OTYPER = 0;
     GPIOA->OSPEEDR = 0;
 
-    //UART CLock
-    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
-    // UART GPIO
-    GPIOA->MODER |= GPIO_MODER_MODER9_1 | GPIO_MODER_MODER10_1; // Pin 9 und 10 Alternate function mode
-    GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL9_Pos; // Pin 9 AF1
-    GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL10_Pos; //Pin 10 AF1
-    //UART Config
-    USART1->BRR = SystemCoreClock / 9600;
-    USART1->CR1 |= USART_CR1_TE | USART_CR1_UE | USART_CR1_RE | USART_CR1_RXNEIE;
-    NVIC_EnableIRQ(USART1_IRQn);
-
     GPIOA->ODR ^= GPIO_ODR_6;
-
     // Timer 1
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
     // RCC->GPIOA is already enabled
@@ -65,26 +55,6 @@ int main(void)
         // delay current blink period
         for (volatile uint64_t i = 0; i < blink_curr; i++)
             ;
+        uart_send("AAAAAAAAAA\r\n");
     }
-}
-
-extern "C" {
-void USART1_IRQHandler(void)
-{ // Interrupt for lower to upper case
-
-    // did we receive a char?
-    if (USART1->ISR & USART_ISR_RXNE) {
-        uint8_t rxchar = (uint8_t)(USART1->RDR); //read char, clear interrupt flag
-
-        if ((rxchar == 's') || (rxchar == 'S')) {
-            blink_curr = blink_slow;
-        } else {
-            if ((rxchar == 'f') || (rxchar == 'F')) {
-                blink_curr = blink_fast;
-            }
-        };
-
-        USART1->TDR = rxchar + 32;
-    }
-}
 }
