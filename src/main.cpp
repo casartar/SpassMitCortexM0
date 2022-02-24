@@ -55,6 +55,6 @@ int main(void)
         // delay current blink period
         for (volatile uint64_t i = 0; i < blink_curr; i++)
             ;
-        uart_send("AAAAAAAAAA\r\n");
+        uart_send("ABCDEFGH\r\n");
     }
 }
