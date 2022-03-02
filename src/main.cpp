@@ -1,3 +1,4 @@
+#include "clockConfig.h"
 #include "stm32f091xc.h"
 
 const uint32_t blink_fast = 100000;
@@ -15,6 +16,7 @@ PA10: USART1_RX (AF1)
 
 int main(void)
 {
+    clockConfig();
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // RCC ON
 
     GPIOA->MODER |= GPIO_MODER_MODER5_0 | GPIO_MODER_MODER6_0; // mode out GPIO 5 and 6
