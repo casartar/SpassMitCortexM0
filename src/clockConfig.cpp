@@ -23,4 +23,6 @@ void clockConfig()
     while (!(RCC->CR & RCC_CR_PLLRDY)) { }
     // Update value of SystemCoreClock
     SystemCoreClockUpdate();
+
+    FLASH->ACR |= 1 << FLASH_ACR_LATENCY_Pos;
 }
