@@ -1,3 +1,4 @@
+#include "clockConfig.h"
 #include "stm32f091xc.h"
 #include "uart.h"
 
@@ -17,7 +18,8 @@ PA10: USART1_RX (AF1)
 int main(void)
 {
     uart_init();
-    RCC->AHBENR |= RCC_AHBENR_GPIOAEN; //RCC ON
+    clockConfig();
+    RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // RCC ON
 
     GPIOA->MODER |= GPIO_MODER_MODER5_0 | GPIO_MODER_MODER6_0; // mode out GPIO 5 and 6
 
