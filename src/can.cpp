@@ -18,7 +18,7 @@ void can_init()
     //
     CAN->MCR &= ~CAN_MCR_SLEEP;
 
-    CAN->BTR = 0x05 | (0x0C << CAN_BTR_TS1_Pos) | (0x01 << CAN_BTR_TS1_Pos);
+    CAN->BTR = 0x001c000b;
 
     // Enter Normal mode
     CAN->MCR &= ~CAN_MCR_INRQ;
