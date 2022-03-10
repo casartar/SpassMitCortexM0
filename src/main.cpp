@@ -1,3 +1,4 @@
+#include "can.h"
 #include "clockConfig.h"
 #include "stm32f091xc.h"
 #include "uart.h"
@@ -19,6 +20,7 @@ int main(void)
 {
     clockConfig();
     uart_init();
+    can_init();
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // RCC ON
 
     GPIOA->MODER |= GPIO_MODER_MODER5_0 | GPIO_MODER_MODER6_0; // mode out GPIO 5 and 6
