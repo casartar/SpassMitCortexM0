@@ -20,13 +20,14 @@ int main(void)
     clockConfig();
     uart_init();
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // RCC ON
+    RCC->AHBENR |= RCC_AHBENR_GPIOBEN; // RCC ON
 
-    GPIOA->MODER |= GPIO_MODER_MODER5_0 | GPIO_MODER_MODER6_0; // mode out GPIO 5 and 6
-
+    GPIOA->MODER |= GPIO_MODER_MODER5_0; // mode out GPIO 5 and 6
+    GPIOB->MODER |= GPIO_MODER_MODER5_0;
     GPIOA->OTYPER = 0;
     GPIOA->OSPEEDR = 0;
 
-    GPIOA->ODR ^= GPIO_ODR_6;
+    GPIOA->ODR ^= GPIO_ODR_5;
     // Timer 1
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
     // RCC->GPIOA is already enabled
