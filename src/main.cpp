@@ -21,6 +21,31 @@ int main(void)
     clockConfig();
     uart_init();
     can_init();
+    can_baudrate(CAN_BAUD_250K);
+    can_open();
+
+    CanMsg canMsg;
+    canMsg.id = 0x123;
+    canMsg.dlc = 8;
+    canMsg.extended = false;
+    canMsg.remote = false;
+    canMsg.data[0] = 0x00;
+    canMsg.data[1] = 0x01;
+    canMsg.data[2] = 0x02;
+    canMsg.data[3] = 0x03;
+    canMsg.data[4] = 0x04;
+    canMsg.data[5] = 0x05;
+    canMsg.data[6] = 0x06;
+    canMsg.data[7] = 0x07;
+
+    while (1) {
+        if (can_transmitMailboxEmpty()) {
+            can_send(canMsg);
+        }
+        for (uint32_t i = 0; i < 100000; i++) {
+        }
+    }
+
     RCC->AHBENR |= RCC_AHBENR_GPIOAEN; // RCC ON
 
     GPIOA->MODER |= GPIO_MODER_MODER5_0 | GPIO_MODER_MODER6_0; // mode out GPIO 5 and 6
