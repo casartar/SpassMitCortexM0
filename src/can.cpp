@@ -1,4 +1,5 @@
 #include "can.h"
+#include "dataOut.h"
 #include "stm32f091xc.h"
 #include "uart.h"
 
@@ -12,6 +13,8 @@ void can_init()
 
     GPIOB->AFR[1] |= 0x0004 << GPIO_AFRH_AFSEL8_Pos;
     GPIOB->AFR[1] |= 0x0004 << GPIO_AFRH_AFSEL9_Pos;
+
+    //CAN->MCR &= ~(1 << 16);
 
     // Leave Sleep mode and enter Initialization mode
     CAN->MCR |= CAN_MCR_INRQ;
@@ -34,13 +37,19 @@ void can_open()
         ;
 
     CAN->FMR |= CAN_FMR_FINIT;
+    CAN->FA1R &= ~CAN_FA1R_FACT0;
+    CAN->FS1R |= CAN_FS1R_FSC0;
+    CAN->FM1R &= ~CAN_FM1R_FBM0;
+    CAN->sFilterRegister[0].FR1 = 0;
+    CAN->sFilterRegister[0].FR2 = 0;
+    CAN->FFA1R &= ~CAN_FFA1R_FFA0;
     CAN->FA1R |= CAN_FA1R_FACT0;
-    CAN->sFilterRegister[0].FR1 = 0x123 << 5 | 0xFF70U << 16;
     CAN->FMR &= ~CAN_FMR_FINIT;
 
     // FIFO message pending interrupt enable
     CAN->IER |= CAN_IER_FMPIE0;
     NVIC_EnableIRQ(CEC_CAN_IRQn);
+    NVIC_SetPriority(CEC_CAN_IRQn, 0);
 }
 
 void can_close()
@@ -93,13 +102,19 @@ bool can_transmitMailboxEmpty()
 }
 
 extern "C" {
-void CEC_CAN_IRQ_Handler(void)
+void CEC_CAN_IRQHandler(void)
 {
-    CanMsg canMsg;
+    GPIOA->ODR ^= GPIO_ODR_15;
 
     if ((CAN->RF0R & CAN_RF0R_FMP0) != 0) {
         // Received CAN frame successfully
+        CanMsg canMsg;
         canMsg.extended = (CAN->sFIFOMailBox[0].RIR & CAN_RI0R_IDE_Msk) >> CAN_RI0R_IDE_Pos;
+        if (canMsg.extended) {
+            canMsg.id = (CAN->sFIFOMailBox[0].RIR & (CAN_RI0R_EXID_Msk | CAN_RI0R_STID_Msk)) >> CAN_RI0R_EXID_Pos;
+        } else {
+            canMsg.id = (CAN->sFIFOMailBox[0].RIR & CAN_RI0R_STID_Msk) >> CAN_RI0R_STID_Pos;
+        }
         canMsg.remote = (CAN->sFIFOMailBox[0].RIR & CAN_RI0R_RTR_Msk) >> CAN_RI0R_RTR_Pos;
         canMsg.dlc = (CAN->sFIFOMailBox[0].RDTR & CAN_RDT0R_DLC_Msk) >> CAN_RDT0R_DLC_Pos;
 
@@ -115,7 +130,7 @@ void CEC_CAN_IRQ_Handler(void)
         // Release Fifo
         CAN->RF0R |= CAN_RF0R_RFOM0;
 
-        uart_send("Received\r\n");
+        dataOut(canMsg);
     }
 }
 }
