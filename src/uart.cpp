@@ -1,10 +1,12 @@
+#include "uart.h"
 #include "stm32f091xc.h"
 #include "string.h"
-#define TX_BUFFERSIZE 256
 
 volatile char uart_txBuffer[TX_BUFFERSIZE];
-volatile uint16_t txIndex;
-volatile uint16_t strLength;
+volatile char uart_rxBuffer[RX_BUFFERSIZE];
+volatile uint16_t txIndex = 0;
+volatile uint16_t strLength = 0;
+volatile bool uart_rxReceiveComplete = false;
 
 void uart_init()
 {
@@ -40,11 +42,18 @@ void uart_receive()
 extern "C" {
 void USART1_IRQHandler(void)
 { // Interrupt for Read/Write
+    static uint16_t rxIndex = 0;
 
     // did we receive a char?
     if (USART1->ISR & USART_ISR_RXNE) {
-        volatile uint8_t rxchar = (uint8_t)(USART1->RDR); //read char, clear interrupt flag
-        GPIOB->ODR ^= GPIO_ODR_5;
+        uint8_t rxchar = (uint8_t)(USART1->RDR); //read char, clear interrupt flag
+        if (rxchar == '\r') {
+            uart_rxBuffer[rxIndex++] = '\0';
+            uart_rxReceiveComplete = true;
+            rxIndex = 0;
+        } else {
+            uart_rxBuffer[rxIndex++] = rxchar;
+        }
     }
     // did we set the send flag?
     if (USART1->ISR & USART_ISR_TXE) {

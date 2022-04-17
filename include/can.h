@@ -3,11 +3,20 @@
 #include <stdint.h>
 
 struct CanMsg {
-    uint32_t id;
-    uint8_t dlc;
-    bool extended;
-    bool remote;
-    uint8_t data[8];
+    uint32_t id = 0;
+    uint8_t dlc = 0;
+    bool extended = false;
+    bool remote = false;
+    uint8_t data[8] = {
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+    };
 };
 
 enum CanBaudrate {
@@ -27,5 +36,6 @@ enum CanBaudrate {
 void can_init();
 void can_baudrate(CanBaudrate baudrate);
 void can_open();
+void can_close();
 void can_send(CanMsg canMsg);
 bool can_transmitMailboxEmpty();
