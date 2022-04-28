@@ -1,5 +1,6 @@
 #include "commandHandler.h"
 #include "can.h"
+#include "led.h"
 #include "uart.h"
 #include <stdlib.h>
 #include <string.h>
@@ -94,19 +95,22 @@ void commandHandler()
                 break;
             }
             break;
-            // S - Command
+            // S - Open
         case 'O':
             if (uart_rxBuffer[1] == '\0' && !canStatusOpened && canBaudrateAlreadySet) {
                 can_open();
                 canStatusOpened = true;
+                led_green_on();
             } else {
                 error = true;
             }
             break;
+            // C - Close
         case 'C':
             if (uart_rxBuffer[1] == '\0' && canStatusOpened) {
                 can_close();
                 canStatusOpened = false;
+                led_green_off();
             } else {
                 error = true;
             }

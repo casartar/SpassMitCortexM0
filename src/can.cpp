@@ -1,5 +1,6 @@
 #include "can.h"
 #include "dataOut.h"
+#include "led.h"
 #include "stm32f091xc.h"
 #include "uart.h"
 
@@ -104,7 +105,7 @@ bool can_transmitMailboxEmpty()
 extern "C" {
 void CEC_CAN_IRQHandler(void)
 {
-    GPIOA->ODR ^= GPIO_ODR_15;
+    led_red_toggle(); //Toggle for "things are happening"
 
     if ((CAN->RF0R & CAN_RF0R_FMP0) != 0) {
         // Received CAN frame successfully
