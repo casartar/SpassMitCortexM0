@@ -1,12 +1,11 @@
 
 #include "uartQueue.h"
-#include <stdint.h>
 
 #define UART_QUEUE_SIZE 128
 
-uint8_t uartQueue[UART_QUEUE_SIZE];
-uint8_t* uartQueueRead;
-uint8_t* uartQueueWrite;
+volatile uint8_t uartQueue[UART_QUEUE_SIZE];
+volatile uint8_t* uartQueueRead;
+volatile uint8_t* uartQueueWrite;
 
 //Init pointer to zero
 void uartQueue_init()
