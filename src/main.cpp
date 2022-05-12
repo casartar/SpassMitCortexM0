@@ -5,10 +5,13 @@
 #include "stm32f091xc.h"
 #include "timer.h"
 #include "uart.h"
+#include "uartQueue.h"
 
 int main(void)
 {
+
     clockConfig();
+    uartQueue_init();
     uart_init();
     can_init();
     can_baudrate(CAN_BAUD_250K);
