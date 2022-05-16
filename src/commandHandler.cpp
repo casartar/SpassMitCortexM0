@@ -22,7 +22,8 @@ void commandHandler()
 
     NVIC_DisableIRQ(USART1_IRQn);
     if (!uartQueue_read(&character)) {
-        //Queue is empty, do nothing
+        // Queue is empty, do nothing
+        NVIC_EnableIRQ(USART1_IRQn);
         return;
     }
     NVIC_EnableIRQ(USART1_IRQn);
@@ -36,7 +37,7 @@ void commandHandler()
         }
     } else {
         if (character == '\r') {
-            //If carriage return, replace with NUL
+            // If carriage return, replace with NUL
             cmdString[cmdStringIndex] = '\0';
             cmdStringIndex = 0;
         } else {
