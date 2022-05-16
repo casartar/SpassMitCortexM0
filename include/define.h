@@ -1,0 +1,2 @@
+#pragma once
+#define CMD_MAX_LEN sizeof("T1111222281122334455667788EA5F\r")
