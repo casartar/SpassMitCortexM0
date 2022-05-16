@@ -1,5 +1,6 @@
 #include "can.h"
-#include "dataOut.h"
+#include "canQueue.h"
+#include "define.h"
 #include "led.h"
 #include "stm32f091xc.h"
 #include "uart.h"
@@ -15,7 +16,7 @@ void can_init()
     GPIOB->AFR[1] |= 0x0004 << GPIO_AFRH_AFSEL8_Pos;
     GPIOB->AFR[1] |= 0x0004 << GPIO_AFRH_AFSEL9_Pos;
 
-    //CAN->MCR &= ~(1 << 16);
+    // CAN->MCR &= ~(1 << 16);
 
     // Leave Sleep mode and enter Initialization mode
     CAN->MCR |= CAN_MCR_INRQ;
@@ -105,7 +106,7 @@ bool can_transmitMailboxEmpty()
 extern "C" {
 void CEC_CAN_IRQHandler(void)
 {
-    led_red_toggle(); //Toggle for "things are happening"
+    led_red_toggle(); // Toggle for "things are happening"
 
     if ((CAN->RF0R & CAN_RF0R_FMP0) != 0) {
         // Received CAN frame successfully
@@ -131,7 +132,7 @@ void CEC_CAN_IRQHandler(void)
         // Release Fifo
         CAN->RF0R |= CAN_RF0R_RFOM0;
 
-        dataOut(canMsg);
+        canQueue_write(&canReceiveQueue, canMsg);
     }
 }
 }

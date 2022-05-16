@@ -179,7 +179,13 @@ void commandHandler()
                             }
                         }
                         if (!error) {
-                            can_send(canMsg);
+                            NVIC_DisableIRQ(CEC_CAN_IRQn);
+                            if (canQueue_write(&canSendQueue, canMsg)) {
+                                NVIC_EnableIRQ(CEC_CAN_IRQn);
+                            } else {
+                                error = true;
+                            }
+                            NVIC_EnableIRQ(CEC_CAN_IRQn);
                         }
 
                     } else {
