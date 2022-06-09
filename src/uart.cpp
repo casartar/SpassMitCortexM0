@@ -17,7 +17,7 @@ void uart_init()
     GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL9_Pos; // Pin 9 AF1
     GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL10_Pos; //Pin 10 AF1
     //UART Config
-    USART1->BRR = SystemCoreClock / 9600;
+    USART1->BRR = SystemCoreClock / 1152000UL;
     USART1->CR1 |= USART_CR1_UE | USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE;
     NVIC_EnableIRQ(USART1_IRQn);
 }
