@@ -1,10 +1,11 @@
 #include "dataOut.h"
+#include "define.h"
 #include "stdio.h"
 #include "uart.h"
 
 void dataOut(CanMsg canMsg)
 {
-    char canMsgString[sizeof("T1111222281122334455667788EA5F\r") + 1];
+    char canMsgString[CMD_MAX_LEN + 1];
 
     // 't' on standard identifier - 'T' on extended identifier
     if (canMsg.extended) {

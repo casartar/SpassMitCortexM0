@@ -1,12 +1,11 @@
 #include "uart.h"
 #include "stm32f091xc.h"
 #include "string.h"
+#include "uartQueue.h"
 
 volatile char uart_txBuffer[TX_BUFFERSIZE];
-volatile char uart_rxBuffer[RX_BUFFERSIZE];
 volatile uint16_t txIndex = 0;
 volatile uint16_t strLength = 0;
-volatile bool uart_rxReceiveComplete = false;
 
 void uart_init()
 {
@@ -18,7 +17,7 @@ void uart_init()
     GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL9_Pos; // Pin 9 AF1
     GPIOA->AFR[1] |= 0x0001 << GPIO_AFRH_AFSEL10_Pos; //Pin 10 AF1
     //UART Config
-    USART1->BRR = SystemCoreClock / 9600;
+    USART1->BRR = SystemCoreClock / 1152000UL;
     USART1->CR1 |= USART_CR1_UE | USART_CR1_TE | USART_CR1_RE | USART_CR1_RXNEIE;
     NVIC_EnableIRQ(USART1_IRQn);
 }
@@ -35,25 +34,13 @@ void uart_send(char* string)
     USART1->TDR = uart_txBuffer[0]; //Transmit first byte, transmit interrupt will be triggered.
     USART1->CR1 |= USART_CR1_TXEIE;
 }
-void uart_receive()
-{
-}
 
 extern "C" {
 void USART1_IRQHandler(void)
 { // Interrupt for Read/Write
-    static uint16_t rxIndex = 0;
-
     // did we receive a char?
     if (USART1->ISR & USART_ISR_RXNE) {
-        uint8_t rxchar = (uint8_t)(USART1->RDR); //read char, clear interrupt flag
-        if (rxchar == '\r') {
-            uart_rxBuffer[rxIndex++] = '\0';
-            uart_rxReceiveComplete = true;
-            rxIndex = 0;
-        } else {
-            uart_rxBuffer[rxIndex++] = rxchar;
-        }
+        uartQueue_write((uint8_t)(USART1->RDR)); //read char, clear interrupt flag
     }
     // did we set the send flag?
     if (USART1->ISR & USART_ISR_TXE) {
